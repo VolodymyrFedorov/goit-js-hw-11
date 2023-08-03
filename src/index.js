@@ -1,76 +1,96 @@
-import { FetchImagesService } from './js/fetchImagesService';
-import { refs } from './js/getRefs';
-import { LoadMoreBtn } from './js/load-more-btn';
-import { makeImageMarkup } from './js/markupService';
+import axios from 'axios';
 import { Notify } from 'notiflix/build/notiflix-notify-aio';
 import SimpleLightbox from "simplelightbox";
 import "simplelightbox/dist/simple-lightbox.min.css";
+import { createCardMarkup } from './js/markupService'
+import { elements } from './js/elements';
 
+const TOKEN = '38624566-af41cffce0f190c9247202d72';
+axios.defaults.baseURL = `https://pixabay.com/api/`;
 
-const fetchImagesService = new FetchImagesService();
-const loadMoreBtn = new LoadMoreBtn({ selector: '.load-more', hidden: true });
-const lightbox = new SimpleLightbox('.gallery a', { captionDelay
-    : 250,
-});
+async function searchByQuery(query, page) {
+  return axios.get(`?key=${TOKEN}&q=${query}&image_type=photo&orientation=horizontal&safesearch=true&page=${page}&per_page=40`);
+};
 
+let counter = 1;
+let searchQuery = '';
 
-function onSearch(e) {
-    e.preventDefault();
+elements.form.addEventListener('submit', onSearch);
+elements.loadMore.addEventListener('click', onLoadMore);
 
-    const currentWord = e.currentTarget.elements.searchQuery.value.trim();
-    if (currentWord === '') {
-        return Notify.info(`Enter a word to search for images.`);
+const options = {
+  rootMargin: '0px',
+  threshold: 1.0
+}
+
+const observer = new IntersectionObserver(onLoadMore, options);
+const lightbox = new SimpleLightbox('.gallery a', { showCounter: false });
+
+async function onSearch(evt) {
+  evt.preventDefault();
+  observer.unobserve(elements.loadMore);
+  searchQuery = evt.currentTarget.searchQuery.value.split(' ').join('+');
+  counter = 1;
+  elements.gallery.innerHTML = '';
+
+  try {
+    elements.loader.style.display = 'inline-block';
+    const resp = await searchByQuery(searchQuery, counter);
+    const totalHits = resp.data.totalHits;
+
+    if (!totalHits) {
+      throw new Error('Sorry, there are no images matching your search query. Please try again.');
     }
-    fetchImagesService.searchQuery = currentWord;
-    loadMoreBtn.show();
-    fetchImagesService.resetPage();
-    clearImageContainer();
-    fetchImages();
+
+    Notify.info(`Hooray! We found ${totalHits} images.`);
+
+    const cardsMarkup = resp.data.hits.map(createCardMarkup).join('');
+    elements.gallery.insertAdjacentHTML('beforeend', cardsMarkup);
+
+    lightbox.refresh();
+  } catch (err) {
+    Notify.warning(err.message);
+    elements.loader.style.display = 'none';
+    return;
+  }
+
+  elements.loader.style.display = 'none';
+  counter = 1;
+  observer.observe(elements.loadMore);
 }
 
-function clearImageContainer() {
-    refs.containerDiv.innerHTML = '';
+async function onLoadMore(entries) {
+  if (entries[0].intersectionRatio <= 0) return;
+  counter += 1;
+  elements.loadMore.style.display = 'none';
+
+  try {
+    elements.loader.style.display = 'inline-block';
+    const resp = await searchByQuery(searchQuery, counter);
+    const cardsMarkup = resp.data.hits.map(createCardMarkup).join('');
+    elements.gallery.insertAdjacentHTML('beforeend', cardsMarkup);
+    elements.loadMore.style.display = 'block';
+
+    if (counter * 40 >= resp.data.totalHits) {
+      throw new Error(`We're sorry, but you've reached the end of search results.`);
+    }
+  } catch (err) {
+    Notify.warning(`${err.message}`);
+    observer.unobserve(entries[0].target);
+    elements.loader.style.display = 'none';
+    elements.loadMore.style.display = 'block';
+    return;
+  }
+
+  lightbox.refresh();
+  smoothScroll();
 }
 
-function fetchImages() {
-    loadMoreBtn.disabled();
-    fetchImagesService.fetchImages().then(({data}) => {
-        if (data.total === 0) {
-            Notify.info(`Sorry, there are no images matching your search query: ${fetchImagesService.searchQuery}. Please try again.`);
-            loadMoreBtn.hide();
-            return;
-        }
-        appendImagesMarkup(data);
-        onPageScrolling()
-        lightbox.refresh();
-        const { totalHits } = data;
+function smoothScroll() {
+  const { height: cardHeight } = document.querySelector(".gallery").firstElementChild.getBoundingClientRect();
 
-        if (refs.containerDiv.children.length === totalHits ) {
-            Notify.info(`We're sorry, but you've reached the end of search results.`);
-            loadMoreBtn.hide();
-        } else {
-            loadMoreBtn.enable();
-            Notify.success(`Hooray! We found ${totalHits} images.`);
-        }
-    }).catch(handleError);
+  window.scrollBy({
+    top: cardHeight,
+    behavior: "smooth",
+  });
 }
-
-function handleError() {
-    console.log('Error!');
-}
-
-function appendImagesMarkup(data) {
-    refs.containerDiv.insertAdjacentHTML('beforeend', makeImageMarkup(data));
-}
-
-function onPageScrolling(){ 
-    const { height: cardHeight } = refs.containerDiv
-        .firstElementChild.getBoundingClientRect();
-        window.scrollBy({
-        top: cardHeight * 2,
-        behavior: "smooth",
-        });
-}
-
-refs.formSearch.addEventListener('submit', onSearch);
-loadMoreBtn.refs.button.addEventListener('click', fetchImages);

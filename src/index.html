@@ -1,33 +1,39 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru">
   <head>
     <meta charset="UTF-8" />
-    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Page title</title>
     <link rel="stylesheet" href="./css/styles.css" />
-    <title>Homework 11</title>
   </head>
   <body>
     <div class="search-container">
       <div class="search-box">
-        <form class="search-form" id="search-form">
+        <form class="js-search-form">
           <input
+            class="search-input"
             type="text"
-            class="input-search"
             name="searchQuery"
             autocomplete="off"
             placeholder="Search images..."
           />
-          <button type="submit" class="btn-search">Search</button>
+          <button class="btn-search" type="submit">Search</button>
         </form>
       </div>
     </div>
     <div class="gallery"></div>
-
-    <button type="button" class="load-more">
-      <span class="label">Load more</span>
-    </button>
-
-    <script type="module" src="index.js"></script>
+    <div class="loader-wrapper">
+      <span class="loader"></span>
+    </div>
+    <div class="js-load-more"></div>
+    <div id="progress">
+      <span id="progress-value">
+        <svg width="24" height="24">
+          <use href="./images/icons.svg#arrow-up"></use>
+        </svg>
+      </span>
+    </div>
+    
+    <script type="module" src="./index.js"></script>
   </body>
 </html>

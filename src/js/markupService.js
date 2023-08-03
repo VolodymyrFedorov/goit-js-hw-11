@@ -1,22 +1,21 @@
-function makeImageMarkup ({ hits }) {
-    const markup = hits.map(({ largeImageURL, webformatURL, tags, likes, views,comments, downloads } ) => `<div class="photo-card">
-    <a class="gallery-item" href="${largeImageURL}"><img class="gallery-image" src="${webformatURL}" alt="${tags}" loading="lazy"/></a>
+function createCardMarkup({ webformatURL, tags, likes, views, comments, downloads, largeImageURL }) {
+  return `<a href="${largeImageURL}" class="photo-card">
+    <div class="img-container"><img class="card-img" src="${webformatURL}" alt="${tags}" loading="lazy" /></div>
     <div class="info">
-    <p class="info-item">
-        <b>Likes: </b></br>${likes}
-    </p>
-    <p class="info-item">
-        <b>Views: </b></br>${views}
-    </p>
-    <p class="info-item">
-        <b>Comments: </b></br>${comments}
-    </p>
-    <p class="info-item">
-        <b>Downloads: </b></br>${downloads}
-    </p>
-    </div></div>`);
-
-    return markup.join('')
+      <p class="item">
+        <b>Likes</b> <span class="text-number">${likes}</span>
+      </p>
+      <p class="item">
+        <b>Views</b> <span class="text-number">${views}</span>
+      </p>
+      <p class="item">
+        <b>Comments</b> <span class="text-number">${comments}</span>
+      </p>
+      <p class="item">
+        <b>Downloads</b> <span class="text-number">${downloads}</span>
+      </p>
+    </div>
+  </a>`;
 }
 
-export { makeImageMarkup };
+export {createCardMarkup}
