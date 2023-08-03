@@ -1,7 +1,7 @@
-import './css/';
+import './css/styles.css';
 import { FetchImagesService } from './js/fetchImagesService';
 import { refs } from './js/getRefs';
-import { LoadMoreBn } from './js/load-more-btn';
+import { LoadMoreBtn } from './js/load-more-btn';
 import { makeImageMarkup } from './js/markupService';
 import { Notify } from 'notiflix/build/notiflix-notify-aio';
 import SimpleLightbox from "simplelightbox";
