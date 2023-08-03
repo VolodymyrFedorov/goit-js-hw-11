@@ -1,4 +1,3 @@
-import './css/styles.css';
 import { FetchImagesService } from './js/fetchImagesService';
 import { refs } from './js/getRefs';
 import { LoadMoreBtn } from './js/load-more-btn';
@@ -9,7 +8,7 @@ import "simplelightbox/dist/simple-lightbox.min.css";
 
 
 const fetchImagesService = new FetchImagesService();
-const loadMoreBtn = new LoadMoreBtn({ selektor: '.load-more', hidden: true });
+const loadMoreBtn = new LoadMoreBtn({ selector: '.load-more', hidden: true });
 const lightbox = new SimpleLightbox('.gallery a', { captionDelay
     : 250,
 });

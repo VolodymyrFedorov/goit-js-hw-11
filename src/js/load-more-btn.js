@@ -1,13 +1,13 @@
 class LoadMoreBtn {
-    constructor({ selektor, hidden = false }) {
-        this.refs = this.getRefs(selektor);
+    constructor({ selector, hidden = false }) {
+        this.refs = this.getRefs(selector);
 
         hidden && this.hide();
     }
 
-    getRefs(selektor) {
+    getRefs(selector) {
         const refs = {};
-        refs.button = document.querySelector(selektor);
+        refs.button = document.querySelector(selector);
         refs.label = refs.button.querySelector('.label');
         return refs;
     }
