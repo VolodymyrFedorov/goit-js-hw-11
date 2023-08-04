@@ -24,7 +24,7 @@ captionsData: 'alt'});
 async function onSearch(evt) {
   evt.preventDefault();
   observer.unobserve(elements.loadMore);
-  searchQuery = evt.currentTarget.searchQuery.value.split(' ').join('+').trim ();
+  searchQuery = evt.currentTarget.searchQuery.value.trim().split(' ').join('+');
   counter = 1;
   elements.gallery.innerHTML = '';
 
