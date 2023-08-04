@@ -55,6 +55,7 @@ async function onSearch(evt) {
     elements.gallery.insertAdjacentHTML('beforeend', cardsMarkup);
 
     lightbox.refresh();
+    
   } catch (err) {
     Notify.warning(err.message);
     elements.loader.style.display = 'none';
