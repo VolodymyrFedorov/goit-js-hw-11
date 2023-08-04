@@ -1,16 +1,9 @@
-import axios from 'axios';
 import { Notify } from 'notiflix/build/notiflix-notify-aio';
 import SimpleLightbox from "simplelightbox";
 import "simplelightbox/dist/simple-lightbox.min.css";
 import { createCardMarkup } from './js/markupService'
 import { elements } from './js/elements';
-
-const TOKEN = '38624566-af41cffce0f190c9247202d72';
-axios.defaults.baseURL = `https://pixabay.com/api/`;
-
-async function searchByQuery(query, page) {
-  return axios.get(`?key=${TOKEN}&q=${query}&image_type=photo&orientation=horizontal&safesearch=true&page=${page}&per_page=40`);
-};
+import { searchByQuery } from './js/axios';
 
 let counter = 1;
 let searchQuery = '';
@@ -31,7 +24,7 @@ captionsData: 'alt'});
 async function onSearch(evt) {
   evt.preventDefault();
   observer.unobserve(elements.loadMore);
-  searchQuery = evt.currentTarget.searchQuery.value.split(' ').join('+');
+  searchQuery = evt.currentTarget.searchQuery.value.split(' ').join('+').trim ();
   counter = 1;
   elements.gallery.innerHTML = '';
 
@@ -54,8 +47,15 @@ async function onSearch(evt) {
     const cardsMarkup = resp.data.hits.map(createCardMarkup).join('');
     elements.gallery.insertAdjacentHTML('beforeend', cardsMarkup);
 
+     if (totalHits < 40) {
+      elements.loadMore.style.display = 'none';
+    } else {
+      elements.loadMore.style.display = 'block';
+      observer.observe(elements.loadMore);
+    }
+
     lightbox.refresh();
-    
+
   } catch (err) {
     Notify.warning(err.message);
     elements.loader.style.display = 'none';
