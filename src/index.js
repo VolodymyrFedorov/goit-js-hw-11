@@ -16,7 +16,6 @@ let counter = 1;
 let searchQuery = '';
 
 elements.form.addEventListener('submit', onSearch);
-elements.loadMore.addEventListener('click', onLoadMore);
 
 const options = {
   rootMargin: '0px',
@@ -32,7 +31,7 @@ async function onSearch(evt) {
   searchQuery = evt.currentTarget.searchQuery.value.split(' ').join('+');
   counter = 1;
   elements.gallery.innerHTML = '';
-
+ 
   try {
     elements.loader.style.display = 'inline-block';
     const resp = await searchByQuery(searchQuery, counter);
@@ -50,11 +49,8 @@ async function onSearch(evt) {
     lightbox.refresh();
   } catch (err) {
     Notify.warning(err.message);
-    elements.loader.style.display = 'none';
     return;
   }
-
-  // elements.loader.style.display = 'none';
   counter = 1;
   observer.observe(elements.loadMore);
 }
@@ -70,6 +66,7 @@ async function onLoadMore(entries) {
 
     if (counter * 40 >= resp.data.totalHits) {
       throw new Error(`We're sorry, but you've reached the end of search results.`);
+      
     }
   } catch (err) {
     Notify.warning(`${err.message}`);
