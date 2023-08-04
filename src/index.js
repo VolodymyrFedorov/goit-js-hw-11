@@ -62,11 +62,11 @@ async function onLoadMore(entries) {
   try {
     const resp = await searchByQuery(searchQuery, counter);
     const cardsMarkup = resp.data.hits.map(createCardMarkup).join('');
+    
     elements.gallery.insertAdjacentHTML('beforeend', cardsMarkup);
 
     if (counter * 40 >= resp.data.totalHits) {
       throw new Error(`We're sorry, but you've reached the end of search results.`);
-      
     }
   } catch (err) {
     Notify.warning(`${err.message}`);
