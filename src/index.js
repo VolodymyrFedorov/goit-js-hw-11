@@ -16,6 +16,7 @@ let counter = 1;
 let searchQuery = '';
 
 elements.form.addEventListener('submit', onSearch);
+elements.loadMore.addEventListener('click', onLoadMore);
 
 const options = {
   rootMargin: '0px',
@@ -31,7 +32,12 @@ async function onSearch(evt) {
   searchQuery = evt.currentTarget.searchQuery.value.split(' ').join('+');
   counter = 1;
   elements.gallery.innerHTML = '';
- 
+  
+  if (!searchQuery) {
+    Notify.warning('Please enter a search query.');
+    return;
+  }
+
   try {
     elements.loader.style.display = 'inline-block';
     const resp = await searchByQuery(searchQuery, counter);
@@ -49,8 +55,11 @@ async function onSearch(evt) {
     lightbox.refresh();
   } catch (err) {
     Notify.warning(err.message);
+    elements.loader.style.display = 'none';
     return;
   }
+
+  elements.loader.style.display = 'none';
   counter = 1;
   observer.observe(elements.loadMore);
 }
@@ -58,12 +67,14 @@ async function onSearch(evt) {
 async function onLoadMore(entries) {
   if (entries[0].intersectionRatio <= 0) return;
   counter += 1;
+  elements.loadMore.style.display = 'none';
 
   try {
+    elements.loader.style.display = 'inline-block';
     const resp = await searchByQuery(searchQuery, counter);
     const cardsMarkup = resp.data.hits.map(createCardMarkup).join('');
-    
     elements.gallery.insertAdjacentHTML('beforeend', cardsMarkup);
+    elements.loadMore.style.display = 'block';
 
     if (counter * 40 >= resp.data.totalHits) {
       throw new Error(`We're sorry, but you've reached the end of search results.`);
@@ -71,12 +82,15 @@ async function onLoadMore(entries) {
   } catch (err) {
     Notify.warning(`${err.message}`);
     observer.unobserve(entries[0].target);
+    elements.loader.style.display = 'none';
+    elements.loadMore.style.display = 'block';
     return;
   }
 
   lightbox.refresh();
   smoothScroll();
 }
+
 
 function smoothScroll() {
   const { height: cardHeight } = document.querySelector(".gallery").firstElementChild.getBoundingClientRect();
