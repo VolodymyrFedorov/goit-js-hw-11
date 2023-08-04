@@ -24,7 +24,9 @@ const options = {
 }
 
 const observer = new IntersectionObserver(onLoadMore, options);
-const lightbox = new SimpleLightbox('.gallery a', { showCounter: false });
+const lightbox = new SimpleLightbox('.gallery a', {
+  showCounter: false,
+captionsData: 'alt'});
 
 async function onSearch(evt) {
   evt.preventDefault();
@@ -32,7 +34,7 @@ async function onSearch(evt) {
   searchQuery = evt.currentTarget.searchQuery.value.split(' ').join('+');
   counter = 1;
   elements.gallery.innerHTML = '';
-  
+
   if (!searchQuery) {
     Notify.warning('Please enter a search query.');
     return;
@@ -76,6 +78,8 @@ async function onLoadMore(entries) {
     elements.gallery.insertAdjacentHTML('beforeend', cardsMarkup);
     elements.loadMore.style.display = 'block';
 
+    lightbox.refresh();
+    
     if (counter * 40 >= resp.data.totalHits) {
       throw new Error(`We're sorry, but you've reached the end of search results.`);
     }
@@ -86,11 +90,8 @@ async function onLoadMore(entries) {
     elements.loadMore.style.display = 'block';
     return;
   }
-
-  lightbox.refresh();
   smoothScroll();
 }
-
 
 function smoothScroll() {
   const { height: cardHeight } = document.querySelector(".gallery").firstElementChild.getBoundingClientRect();
